@@ -42,13 +42,15 @@ public class UserController {
 		MediaType.APPLICATION_XML_VALUE , MediaType.APPLICATION_JSON_VALUE
 	}) 
 	public ResponseEntity<UserRest> getUser(@PathVariable String userId) {
-		UserRest userResponse = new UserRest();
-		userResponse.setEmail("ac@mail.com");
-		userResponse.setFirstName("Alex");
-		userResponse.setLastName("Ciub");
-		userResponse.setUserId(userId);
-		return new ResponseEntity<UserRest>(userResponse , HttpStatus.OK);
-	}
+		
+		if(users.containsKey(userId)) {
+			return new ResponseEntity<>(users.get(userId) , HttpStatus.OK);
+		}
+		else
+		{
+		   return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+	    }
+		}
 	
 	@PostMapping(produces = {
 			MediaType.APPLICATION_XML_VALUE , MediaType.APPLICATION_JSON_VALUE
@@ -58,9 +60,9 @@ public class UserController {
 	public ResponseEntity<UserRest> createUser(@Valid @RequestBody UserDetailsResponseModel userDetails) {
 
 		UserRest userResponse = new UserRest();
-		userResponse.setEmail("ac@mail.com");
-		userResponse.setFirstName("Alex");
-		userResponse.setLastName("Ciub");
+		userResponse.setEmail(userDetails.getEmail());
+		userResponse.setFirstName(userDetails.getFirstName());
+		userResponse.setLastName(userDetails.getLastName());
 		
 		
 		String userId = UUID.randomUUID().toString();
