@@ -20,6 +20,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.appsdeveloperblog.app.ws.exception.UserServiceException;
+import com.appsdeveloperblog.app.ws.ui.model.request.UpdateUserDetailsResponseModel;
 import com.appsdeveloperblog.app.ws.ui.model.request.UserDetailsResponseModel;
 import com.appsdeveloperblog.app.ws.ui.model.response.UserRest;
 
@@ -42,6 +44,8 @@ public class UserController {
 		MediaType.APPLICATION_XML_VALUE , MediaType.APPLICATION_JSON_VALUE
 	}) 
 	public ResponseEntity<UserRest> getUser(@PathVariable String userId) {
+		
+		if(true) throw new UserServiceException("A user Service exception is thrown");
 		
 		if(users.containsKey(userId)) {
 			return new ResponseEntity<>(users.get(userId) , HttpStatus.OK);
@@ -74,14 +78,36 @@ public class UserController {
 		return new ResponseEntity<UserRest>(userResponse , HttpStatus.OK);
 	}
 	
-	@PutMapping
-	public String updateUser() {
-		return "put method , update user";
+	@PutMapping(path="/{userId}" , consumes = {MediaType.APPLICATION_JSON_VALUE , 
+											   MediaType.APPLICATION_XML_VALUE
+											   })
+	public ResponseEntity<UserRest> updateUser(@PathVariable String userId , 
+			                                   @Valid @RequestBody UpdateUserDetailsResponseModel userDetails)
+	{
+		if(users.get(userId)!= null) {
+			UserRest userRest = users.get(userId);
+			userRest.setFirstName(userDetails.getFirstName());
+			userRest.setLastName(userDetails.getLastName());
+			users.put(userId, userRest);
+			return new ResponseEntity<UserRest>(userRest , HttpStatus.OK);
+		}
+		else {
+			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+		}
 	}
 	
-	@DeleteMapping
-	public String deleteUser() {
-		return "delete method , delete user";
+	@DeleteMapping(path = "/{userId}")
+	public ResponseEntity<Void> deleteUser(@PathVariable String userId) {
+		
+		if(users.get(userId)!=null) {
+			users.remove(userId);
+			//return new ResponseEntity<>("Record deleted successfully" , HttpStatus.OK);
+			return ResponseEntity.noContent().build();
+		}else {
+			//return new ResponseEntity<>("Record not found" , HttpStatus.NOT_FOUND);
+			return ResponseEntity.notFound().build();
+		}
+		
 	}
 
 }
