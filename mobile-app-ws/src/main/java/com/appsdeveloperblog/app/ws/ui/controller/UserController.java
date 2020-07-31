@@ -6,6 +6,7 @@ import java.util.UUID;
 
 import javax.validation.Valid;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -24,6 +25,8 @@ import com.appsdeveloperblog.app.ws.exception.UserServiceException;
 import com.appsdeveloperblog.app.ws.ui.model.request.UpdateUserDetailsResponseModel;
 import com.appsdeveloperblog.app.ws.ui.model.request.UserDetailsResponseModel;
 import com.appsdeveloperblog.app.ws.ui.model.response.UserRest;
+import com.appsdeveloperblog.app.ws.userservice.UserService;
+import com.appsdeveloperblog.app.ws.userservice.UserServiceImpl;
 
 @RestController
 @RequestMapping("users")
@@ -31,6 +34,9 @@ import com.appsdeveloperblog.app.ws.ui.model.response.UserRest;
 public class UserController {
 
 	private Map<String , UserRest> users;
+	
+	@Autowired
+	private UserService userService;
 	
 	@GetMapping
 	public String getUsers(@RequestParam(value="page" , defaultValue = "1" , required = false) int page , 
@@ -63,17 +69,7 @@ public class UserController {
 			})
 	public ResponseEntity<UserRest> createUser(@Valid @RequestBody UserDetailsResponseModel userDetails) {
 
-		UserRest userResponse = new UserRest();
-		userResponse.setEmail(userDetails.getEmail());
-		userResponse.setFirstName(userDetails.getFirstName());
-		userResponse.setLastName(userDetails.getLastName());
-		
-		
-		String userId = UUID.randomUUID().toString();
-		userResponse.setUserId(userId);
-		if(users == null) 
-			users = new HashMap<>();
-		users.put(userId, userResponse);
+		UserRest userResponse = userService.createUser(userDetails);
 		
 		return new ResponseEntity<UserRest>(userResponse , HttpStatus.OK);
 	}
